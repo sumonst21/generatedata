@@ -1,4 +1,4 @@
-import { generate } from '../StreetAddress.generator';
+import { generate } from '../StreetAddress.generate';
 import * as sinon from 'sinon';
 import utils from '../../../../utils';
 import { DTGenerationData } from '~types/dataTypes';
@@ -12,9 +12,7 @@ describe('generate', () => {
 		countryI18n: {},
 		existingRowData: [],
 		countryData: {},
-		workerResources: {
-			workerUtils: ''
-		}
+		template: {}
 	};
 
 	afterEach(() => {
@@ -29,7 +27,7 @@ describe('generate', () => {
 			.onCall(1).returns(555) // PO Box
 			.onCall(2).returns(1234); // street name number
 
-		expect(generate(data)).toEqual({
+		expect(generate(data, utils)).toEqual({
 			display: 'P.O. Box 555, 1234 Wilkins St'
 		});
 	});
@@ -42,7 +40,7 @@ describe('generate', () => {
 			.onCall(1).returns(555)
 			.onCall(2).returns(1234);
 
-		expect(generate(data)).toEqual({
+		expect(generate(data, utils)).toEqual({
 			display: '555-1234 Wilkins St'
 		});
 	});
@@ -55,7 +53,7 @@ describe('generate', () => {
 			.onCall(1).returns(555)
 			.onCall(2).returns(1234);
 
-		expect(generate(data)).toEqual({
+		expect(generate(data, utils)).toEqual({
 			display: 'Ap #555-1234 Wilkins St'
 		});
 	});
@@ -68,7 +66,7 @@ describe('generate', () => {
 			.onCall(1).returns(555)
 			.onCall(2).returns(1234);
 
-		expect(generate(data)).toEqual({
+		expect(generate(data, utils)).toEqual({
 			display: '555 Wilkins St'
 		});
 	});

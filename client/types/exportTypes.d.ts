@@ -1,3 +1,4 @@
+// TODO rename to exportTypePlugins.ts
 import { GeneratorLayout } from '~core/generator/Generator.component';
 import { ColumnData } from '~types/general';
 import { CountryMap } from '~types/countries';
@@ -22,6 +23,11 @@ export type ETBundle = {
 	isValid?: (data: any) => boolean;
 };
 
+export type ETBrowserBundle = Omit<ETBundle, 'generate'>;
+
+// oddity, but this is used to let the main application know when the Export Type is in an invalid state. This prevents
+// it from attempting to generate anything until it's resolved
+// TODO rename. Maybe ETRequiredState / ETCoreState?
 export interface ETState {
 	isValid: boolean;
 }
@@ -51,16 +57,14 @@ export type ETMessageData = {
 	settings: any; // TODO generic possible? This is the export type settings
 	stripWhitespace: boolean;
 	rowState: any;
-	workerResources: {
-		workerUtils: string;
-		exportTypes: ExportTypeMap;
-		dataTypes: DataTypeMap;
-		countries: CountryMap;
-	};
+	workerUtilsUrl: string;
+	exportTypes: ExportTypeMap;
+	dataTypes: DataTypeMap;
+	countries: CountryMap;
 };
 
 interface ETOnMessage extends MessageEvent {
-	data: ETMessageData
+	data: ETMessageData;
 }
 
 export type ETDownloadPacket = {

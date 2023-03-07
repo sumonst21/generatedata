@@ -1,4 +1,4 @@
-## Computed Data Type
+# [Docs](../../../../../docs/README.md) &raquo; [Plugins](../../README.md) &raquo; [Data Types](../README.md) &raquo; Computed
 
 This Data Type lets you grab the content from other generate rows and manipulate that information however you need.
 

@@ -1,4 +1,4 @@
-## NumberRange Data Type
+# [Docs](../../../../../docs/README.md) &raquo; [Plugins](../../README.md) &raquo; [Data Types](../README.md) &raquo; NumberRange
 
 This Data Type generates a number.
 

@@ -1,12 +1,14 @@
 import { DTBundle } from '~types/dataTypes';
-import { initialState, Example, Options, Help, getMetadata } from './Colour';
+import { Example, Options, Help, getMetadata, rowStateReducer } from './Colour';
+import { initialState } from './Colour.state';
 
 const bundle: DTBundle = {
 	initialState,
 	Example,
 	Options,
 	Help,
-	getMetadata
+	getMetadata,
+	rowStateReducer
 };
 
 export default bundle;

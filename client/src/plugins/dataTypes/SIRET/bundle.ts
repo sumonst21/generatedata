@@ -1,10 +1,11 @@
 import { DTBundle } from '~types/dataTypes';
-import { initialState, Options, Help } from './SIRET';
+import { Options, Help } from './SIRET';
+import { initialState } from './SIRET.state';
 
 const bundle: DTBundle = {
 	initialState,
 	Options,
-	Help
+	Help,
 };
 
 export default bundle;

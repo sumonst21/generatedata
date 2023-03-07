@@ -7,36 +7,8 @@ import Dropdown, { DropdownOption } from '~components/dropdown/Dropdown';
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '~components/dialogs';
 import RadioPill, { RadioPillRow } from '~components/pills/RadioPill';
 import { Tooltip } from '~components/tooltips';
+import { ColourFormatEnum, ColourState, LuminosityTypeEnum, GenerationOptionsType } from './Colour.state';
 import styles from './Colour.scss';
-
-export const enum ColourFormat {
-	hex = 'hex',
-	rgb = 'rgb',
-	rgba = 'rgba'
-}
-
-export const enum LuminosityType {
-	any = 'any',
-	bright = 'bright',
-	light = 'light',
-	dark = 'dark'
-}
-
-export type ColourState = {
-	example: string;
-	value: string;
-	luminosity: LuminosityType;
-	format: ColourFormat;
-	alpha: number;
-};
-
-export const initialState: ColourState = {
-	example: 'any',
-	value: 'any',
-	luminosity: LuminosityType.any,
-	format: ColourFormat.hex,
-	alpha: 1
-};
 
 const getModalOptions = ({ i18n }: any): DropdownOption[] => ([
 	{ value: 'any', label: i18n.anyColour },
@@ -77,7 +49,7 @@ const ColourDialog = ({ visible, data, id, onClose, coreI18n, onUpdate, i18n }: 
 			hue: data.value,
 			luminosity: data.luminosity,
 			format: data.format,
-			alpha: data.format === ColourFormat.rgba ? data.alpha : 1
+			alpha: data.format === ColourFormatEnum.rgba ? data.alpha : 1
 		}));
 	}, [data, counter]);
 
@@ -113,30 +85,30 @@ const ColourDialog = ({ visible, data, id, onClose, coreI18n, onUpdate, i18n }: 
 									<RadioPillRow>
 										<RadioPill
 											label={i18n.any}
-											onClick={(): void => onChange('luminosity', LuminosityType.any)}
+											onClick={(): void => onChange('luminosity', LuminosityTypeEnum.any)}
 											name={`luminosity-${id}`}
-											checked={data.luminosity === LuminosityType.any}
+											checked={data.luminosity === LuminosityTypeEnum.any}
 											style={{ marginRight: 6 }}
 										/>
 										<RadioPill
 											label={i18n.bright}
-											onClick={(): void => onChange('luminosity', LuminosityType.bright)}
+											onClick={(): void => onChange('luminosity', LuminosityTypeEnum.bright)}
 											name={`luminosity-${id}`}
-											checked={data.luminosity === LuminosityType.bright}
+											checked={data.luminosity === LuminosityTypeEnum.bright}
 											style={{ marginRight: 6 }}
 										/>
 										<RadioPill
 											label={i18n.light}
-											onClick={(): void => onChange('luminosity', LuminosityType.light)}
+											onClick={(): void => onChange('luminosity', LuminosityTypeEnum.light)}
 											name={`luminosity-${id}`}
-											checked={data.luminosity === LuminosityType.light}
+											checked={data.luminosity === LuminosityTypeEnum.light}
 											style={{ marginRight: 6 }}
 										/>
 										<RadioPill
 											label={i18n.dark}
-											onClick={(): void => onChange('luminosity', LuminosityType.dark)}
+											onClick={(): void => onChange('luminosity', LuminosityTypeEnum.dark)}
 											name={`luminosity-${id}`}
-											checked={data.luminosity === LuminosityType.dark}
+											checked={data.luminosity === LuminosityTypeEnum.dark}
 										/>
 									</RadioPillRow>
 								</td>
@@ -147,23 +119,23 @@ const ColourDialog = ({ visible, data, id, onClose, coreI18n, onUpdate, i18n }: 
 									<RadioPillRow>
 										<RadioPill
 											label="Hex"
-											onClick={(): void => onChange('format', ColourFormat.hex)}
+											onClick={(): void => onChange('format', ColourFormatEnum.hex)}
 											name={`format-${id}`}
-											checked={data.format === ColourFormat.hex}
+											checked={data.format === ColourFormatEnum.hex}
 											style={{ marginRight: 6 }}
 										/>
 										<RadioPill
 											label="rgb"
-											onClick={(): void => onChange('format', ColourFormat.rgb)}
+											onClick={(): void => onChange('format', ColourFormatEnum.rgb)}
 											name={`format-${id}`}
-											checked={data.format === ColourFormat.rgb}
+											checked={data.format === ColourFormatEnum.rgb}
 											style={{ marginRight: 6 }}
 										/>
 										<RadioPill
 											label="rbga"
-											onClick={(): void => onChange('format', ColourFormat.rgba)}
+											onClick={(): void => onChange('format', ColourFormatEnum.rgba)}
 											name={`format-${id}`}
-											checked={data.format === ColourFormat.rgba}
+											checked={data.format === ColourFormatEnum.rgba}
 										/>
 									</RadioPillRow>
 								</td>
@@ -178,7 +150,7 @@ const ColourDialog = ({ visible, data, id, onClose, coreI18n, onUpdate, i18n }: 
 										min={0}
 										max={1}
 										valueLabelDisplay="auto"
-										disabled={data.format !== ColourFormat.rgba}
+										disabled={data.format !== ColourFormatEnum.rgba}
 									/>
 								</td>
 							</tr>
@@ -261,3 +233,6 @@ export const getMetadata = (): DTMetadata => ({
 		field_MSSQL: 'VARCHAR(12) NULL'
 	}
 });
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const rowStateReducer = ({ example, ...other }: ColourState): GenerationOptionsType => other;

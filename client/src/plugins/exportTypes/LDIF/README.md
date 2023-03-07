@@ -1,4 +1,4 @@
-## LDIF Export Type
+# [Docs](../../../../../docs/README.md) &raquo; [Plugins](../../README.md) &raquo; [Export Types](../README.md) &raquo; LDIF
 
 This plugin generates data in LDIF (LDAP Data Exchange Format).
 

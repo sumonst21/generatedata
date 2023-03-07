@@ -2,35 +2,9 @@ import * as React from 'react';
 import Switch from '@material-ui/core/Switch';
 import Dropdown from '~components/dropdown/Dropdown';
 import TextField from '~components/TextField';
-import { ETDownloadPacket, ETDownloadPacketResponse, ETSettings, ETState } from '~types/exportTypes';
+import { SQLSettings } from './SQL.state';
+import { ETDownloadPacket, ETDownloadPacketResponse, ETSettings } from '~types/exportTypes';
 import styles from './SQL.scss';
-
-
-export interface SQLSettings extends ETState {
-	tableName: string;
-	databaseType: 'MySQL' | 'Postgres' | 'SQLite' | 'Oracle' | 'MSSQL';
-	createTable: boolean;
-	dropTable: boolean;
-	encloseInBackQuotes: boolean;
-	statementType: 'insert' | 'insertIgnore' | 'update';
-	insertBatchSize: number;
-	addPrimaryKey: boolean;
-	isValid: boolean;
-	quotes: 'single' | 'double';
-}
-
-export const initialState: SQLSettings = {
-	tableName: 'myTable',
-	databaseType: 'MySQL',
-	createTable: true,
-	dropTable: true,
-	encloseInBackQuotes: true,
-	statementType: 'insert',
-	insertBatchSize: 10,
-	addPrimaryKey: true,
-	isValid: true,
-	quotes: 'single'
-};
 
 export const Settings = ({ coreI18n, i18n, onUpdate, id, data }: ETSettings): any => {
 	const onChange = (field: string, value: any): void => {
@@ -276,19 +250,19 @@ export const getCodeMirrorMode = (): string => 'text/x-sql';
 
 export const getExportTypeLabel = (data: SQLSettings): string => data.databaseType;
 
-export const validateTitleField = (title: string, settings: SQLSettings): null | string => {
+export const validateTitleField = (title: string, i18n: any, settings: SQLSettings): null | string => {
 	// as noted in issues/262, SQL Server allows spaces in the db names, hence the separate regexp. issues/426 noted
 	// that MySQL tables can begin with _ (and 0-9 as it turns out).
-	const validTableCol = new RegExp("^[0-9a-zA-Z_$]*$");
-	const validTableColSQLServer = new RegExp("^[_a-zA-Z][0-9a-zA-Z_\\s]*$");
+	const validTableCol = new RegExp('^[0-9a-zA-Z_$]*$');
+	const validTableColSQLServer = new RegExp('^[_a-zA-Z][0-9a-zA-Z_-\\s]*$');
 
-	if (settings.databaseType === "MSSQL") {
+	if (settings.databaseType === 'MSSQL') {
 		if (!validTableColSQLServer.test(title)) {
-			return "error here.";
+			return i18n.validationInvalidColName;
 		}
 	} else {
 		if (!validTableCol.test(title)) {
-			return "error string here.";
+			return i18n.validationInvalidColName;
 		}
 	}
 
@@ -299,7 +273,6 @@ export const getDownloadFileInfo = ({ packetId }: ETDownloadPacket): ETDownloadP
 	filename: `data-${packetId}.sql`,
 	fileType: 'text/x-sql'
 });
-
 
 export const isValid = (settings: SQLSettings): boolean => {
 	if (!settings.tableName) {

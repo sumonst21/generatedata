@@ -48,8 +48,6 @@ export const defaultPlaceholders = {
  *     X       - 1-9
  *     x       - 0-9
  *     H       - 0-F
- *
- * *** Note: don't change these placeholders.
  */
 export const generateRandomAlphanumericStr = (str: string, placeholders: any = defaultPlaceholders): string => {
 	if (!str) {
@@ -79,6 +77,29 @@ export const getRandomSubset = <T> (arr: T[], size: number): T[] => {
 		shuffled[totalArrSize] = temp;
 	}
 	return shuffled.slice(min);
+};
+
+export const getRandomWeightedSubset = (options: WeightedOptions, size: number, allowDuplicates: boolean): string[] => {
+	const subset: string[] = [];
+	const weightedOptions = {
+		...options
+	};
+	let totalArrSize = Object.keys(weightedOptions).length;
+
+	if (!totalArrSize) {
+		return subset;
+	}
+
+	while (subset.length < size && totalArrSize > 0) {
+		const value = getRandomWeightedValue(weightedOptions);
+		subset.push(value);
+		if (!allowDuplicates) {
+			delete weightedOptions[value];
+			totalArrSize = totalArrSize-1;
+		}
+	}
+
+	return subset;
 };
 
 /**
@@ -132,6 +153,10 @@ export const getRandomWeightedValue = (options: WeightedOptions): string => {
 		runningTotal += relativeValue;
 		return cv;
 	});
+
+	if (keys.length === 0) {
+		return '';
+	}
 
 	const r = Math.random();
 	return cumulativeValues.find(({ value }) => r <= value)!.key;

@@ -13,26 +13,16 @@ type WorkerMap = {
 	[workerId: string]: Worker;
 }
 
-const dataTypeWorkers: WorkerMap = {};
-const exportTypeWorkers: WorkerMap = {};
+const generationWorkers: WorkerMap = {};
 
-export const createDataTypeWorker = (customId: string | null = null): string => {
+export const createGenerationWorker = (customId: string | null = null): string => {
 	const workerId = (customId) ? customId : nanoid();
-	dataTypeWorkers[workerId] = new Worker(`./workers/${webWorkers.coreDataTypeWorker}`);
+	generationWorkers[workerId] = new Worker(`./workers/${webWorkers.generationWorker}`);
 	return workerId;
 };
 
-export const getDataTypeWorker = (id: string): Worker => dataTypeWorkers[id];
-
-export const destroyDataTypeWorker = (id: string): void => { delete dataTypeWorkers[id]; };
-
-export const createExportTypeWorker = (customId: string | null = null): string => {
-	const workerId = (customId) ? customId : nanoid();
-	exportTypeWorkers[workerId] = new Worker(`./workers/${webWorkers.coreExportTypeWorker}`);
-	return workerId;
-};
-
-export const getExportTypeWorker = (id: string): Worker => exportTypeWorkers[id];
+export const getGenerationWorker = (id: string): Worker => generationWorkers[id];
+export const destroyGenerationWorker = (id: string): void => { delete generationWorkers[id]; };
 
 export const getDataTypeWorkerMap = (dataTypes: DataTypeFolder[]): DataTypeMap => {
 	const map: DataTypeMap = {};
@@ -52,22 +42,14 @@ export const getExportTypeWorkerMap = (exportTypes: ExportTypeMap): ExportTypeMa
 	return map;
 };
 
-// TODO rename to getWorkerUtilsFilename ?
-export const getWorkerUtils = (): string => webWorkers.workerUtils;
+export const getWorkerUtilsUrl = (): string => webWorkers.workerUtils;
 
 const messageIds: any = {};
-const liveMessages: any = {};
 
 // wrapper method for the worker calls. This just adds a layer to abort any previous unfinished messages that are
 // sent to the worker. It's up to the worker to handle aborting it however it sees fit, but the important part is
 // that it doesn't post back any data from stale requests
 export const performTask = (workerName: string, worker: any, postMessagePayload: any, onMessage: any): void => {
-	if (liveMessages[workerName]) {
-		console.log("trying to abort");
-		worker.postMessage({ _action: 'abort', _messageId: messageIds[workerName] });
-		liveMessages[workerName] = false;
-	}
-
 	if (!messageIds[workerName]) {
 		messageIds[workerName] = 1;
 	} else {
@@ -76,7 +58,7 @@ export const performTask = (workerName: string, worker: any, postMessagePayload:
 
 	worker.postMessage({
 		...postMessagePayload,
-		_messageId: 1
+		_messageId: 1 // TODO
 	});
 
 	worker.onmessage = (data: any): void => {
@@ -94,7 +76,7 @@ export const getCountryNamesBundle = (): any => {
 		import(
 			/* webpackChunkName: "countryNames" */
 			/* webpackMode: "lazy" */
-			`../../_namePlugins`
+			'../../_namePlugins'
 		)
 			.then((resp: any) => {
 				namesPlugins = resp.default;

@@ -3,6 +3,7 @@ import { MainState } from '~store/main/main.reducer';
 import { PacketsState } from '~store/packets/packets.reducer';
 import { AccountState } from '~store/account/account.reducer';
 import { DataTypeFolder } from '../_plugins';
+import { availableLocales } from '../_env';
 import { DTMetadata } from '~types/dataTypes';
 
 declare global {
@@ -10,9 +11,8 @@ declare global {
         gd: any;
         CodeMirror: any;
         __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: any;
-        gapi: any;
-		initGoogleAuth: any;
 		clipboardData: any;
+		google: any;
     }
 }
 
@@ -28,7 +28,7 @@ export const enum AuthMethod {
 	google = 'google'
 }
 
-export type GDLocale = 'ar' | 'en' | 'fr' | 'de' | 'es' | 'ja' | 'hi' | 'nl' | 'pt' | 'ta' | 'zh';
+export type GDLocale = typeof availableLocales[number];
 
 export type GDLocaleMap = {
 	[locale in GDLocale]: string;
@@ -67,12 +67,11 @@ export type GenerationTemplateRow = {
     title: string;
     dataType: DataTypeFolder;
 	rowState: any;
-    colMetadata: () => any;
     colIndex: number;
 }
 
 export type GenerationTemplate = {
-    [num: number]: GenerationTemplateRow[];
+    [processOrder: number]: GenerationTemplateRow[];
 };
 
 export type ColumnData = {

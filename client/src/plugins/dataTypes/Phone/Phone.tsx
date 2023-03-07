@@ -2,18 +2,9 @@ import * as React from 'react';
 import Dropdown from '~components/dropdown/Dropdown';
 import { DTExampleProps, DTHelpProps, DTMetadata, DTOptionsProps } from '~types/dataTypes';
 import CreatablePillField from '~components/creatablePillField/CreatablePillField';
+import { PhoneState, GenerationOptionsType } from './Phone.state';
 
-export type PhoneState = {
-	example: string;
-	option: string[];
-};
-
-export const initialState: PhoneState = {
-	example: '1-Xxx-Xxx-xxxx|(Xxx) Xxx-xxxx',
-	option: ['1-Xxx-Xxx-xxxx', '(Xxx) Xxx-xxxx']
-};
-
-export const rowStateReducer = (state: PhoneState): string[] => state.option;
+export const rowStateReducer = (state: PhoneState): GenerationOptionsType => ({ option: state.option });
 
 export const Example = ({ i18n, data, onUpdate }: DTExampleProps): JSX.Element => {
 	const onChange = (value: any): void => {

@@ -7,4 +7,3 @@ const bundle: ETBundle = {
 };
 
 export default bundle;
-

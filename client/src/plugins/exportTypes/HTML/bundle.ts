@@ -1,5 +1,6 @@
 import { ETBundle } from '~types/exportTypes';
-import { Settings, initialState, getCodeMirrorMode, getDownloadFileInfo } from './HTML';
+import { Settings, getCodeMirrorMode, getDownloadFileInfo } from './HTML';
+import { initialState } from './HTML.state';
 
 const bundle: ETBundle = {
 	Settings,

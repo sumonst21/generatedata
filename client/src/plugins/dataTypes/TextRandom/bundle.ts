@@ -1,5 +1,6 @@
 import { DTBundle } from '~types/dataTypes';
-import { initialState, Options, Help, getMetadata, rowStateReducer } from './TextRandom';
+import { Options, Help, getMetadata, rowStateReducer } from './TextRandom';
+import { initialState } from './TextRandom.state';
 
 const bundle: DTBundle = {
 	initialState,

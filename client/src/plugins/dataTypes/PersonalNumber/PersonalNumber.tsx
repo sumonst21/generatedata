@@ -1,18 +1,12 @@
 import * as React from 'react';
-import { DTExampleProps, DTHelpProps, DTOptionsProps } from '~types/dataTypes';
+import { DTExampleProps, DTHelpProps, DTMetadata, DTOptionsProps } from '~types/dataTypes';
 import Dropdown from '~components/dropdown/Dropdown';
 
 
 // TODO: figure out what this component IS. Is it for specific countries? Sweden has 12 chars...
 // https://en.wikipedia.org/wiki/Personal_identity_number_%28Sweden%29
 
-export const initialState = {
-	example: '',
-	separator: ' '
-};
-
 export const Example = ({ coreI18n, i18n, data, onUpdate }: DTExampleProps): JSX.Element => {
-
 	const onChange = (value: any): void => {
 		onUpdate({
 			example: value,
@@ -63,3 +57,16 @@ export const Help = ({ i18n }: DTHelpProps): JSX.Element => (
 		</table>
 	</>
 );
+
+export const getMetadata = (): DTMetadata => {
+	// Called before separator is set, so margin should be used
+	// $len = 12 + strlen(static::$sep);
+	const len = 13; // should be enough, allow for max one char sep
+	return {
+		sql: {
+			field: `varchar(${len}) default NULL`,
+			field_Oracle: `varchar2(${len}) default NULL`,
+			field_MSSQL: `VARCHAR(${len}) NULL`
+		}
+	};
+};

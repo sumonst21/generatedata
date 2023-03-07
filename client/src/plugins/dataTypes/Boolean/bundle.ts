@@ -1,5 +1,6 @@
 import { DTBundle } from '~types/dataTypes';
-import { initialState, Example, Options, Help, rowStateReducer, getMetadata } from './Boolean';
+import { Example, Options, Help, rowStateReducer, getMetadata } from './Boolean';
+import { initialState } from './Boolean.state';
 
 const bundle: DTBundle = {
 	initialState,

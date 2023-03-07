@@ -3,21 +3,8 @@ import Dropdown from '~components/dropdown/Dropdown';
 import TextField from '~components/TextField';
 import { isNumeric } from '~utils/numberUtils';
 import { DTExampleProps, DTHelpProps, DTMetadata, DTMetadataType, DTOptionsProps } from '~types/dataTypes';
+import { AutoIncrementState, GenerationOptionsType } from './AutoIncrement.state';
 import styles from './AutoIncrement.scss';
-
-export type AutoIncrementState = {
-	example: string;
-	incrementStart: string;
-	incrementValue: string;
-	incrementPlaceholder: string;
-}
-
-export const initialState: AutoIncrementState = {
-	example: '1,1',
-	incrementStart: '1',
-	incrementValue: '1',
-	incrementPlaceholder: ''
-};
 
 export const Example = ({ data, onUpdate }: DTExampleProps): JSX.Element => {
 	const onChange = (value: string): void => {
@@ -130,7 +117,7 @@ export const getMetadata = (rowData: AutoIncrementState): DTMetadata => {
 	};
 };
 
-export const rowStateReducer = (state: AutoIncrementState): any => {
+export const rowStateReducer = (state: AutoIncrementState): GenerationOptionsType => {
 	const incrementStart = (state.incrementStart) ? parseFloat(state.incrementStart) : 0;
 	const incrementValue = (state.incrementValue) ? parseFloat(state.incrementValue) : 0;
 

@@ -1,5 +1,6 @@
 import { DTBundle } from '~types/dataTypes';
-import { initialState, Options, Help, getMetadata, rowStateReducer } from './TextFixed';
+import { Options, Help, getMetadata, rowStateReducer } from './TextFixed';
+import { initialState } from './TextFixed.state';
 
 const bundle: DTBundle = {
 	initialState,

@@ -4,7 +4,11 @@ const crypto = require('crypto');
 const helpers = require('./build/helpers');
 const i18n = require('./build/i18n');
 
-require('dotenv').config();
+const result = require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+if (result.error) {
+	console.error("\nMissing .env file.... Please see the documentation about setting up your environment.\n", result);
+	return;
+}
 
 const locales = process.env.GD_LOCALES.split(',');
 
@@ -31,9 +35,7 @@ const getFilenameHash = (filename) => {
 // then this object is updated with the change & the final map file is regenerated. For prod it's just done in
 // one go
 const webWorkerMap = {
-	coreWorker: '',
-	coreDataTypeWorker: '',
-	coreExportTypeWorker: '',
+	generationWorker: '',
 	workerUtils: '',
 	dataTypes: {},
 	exportTypes: {}
@@ -43,6 +45,7 @@ module.exports = function (grunt) {
 	const dataTypesFolder = 'src/plugins/dataTypes';
 	const exportTypesFolder = 'src/plugins/exportTypes';
 	const countriesFolder = 'src/plugins/countries';
+	const mainTranslationsFolder = 'src/i18n/';
 
 	const checkPlugin = (pluginType) => {
 		const folderMap = {
@@ -194,11 +197,11 @@ window.gd.localeLoaded(i18n);
 
 		const map = {};
 		folders.forEach((folder) => {
-			const webworkerFile = path.join(__dirname, `/src/plugins/dataTypes/${folder}/${folder}.generator.ts`);
+			const webworkerFile = path.join(__dirname, `/src/plugins/dataTypes/${folder}/${folder}.worker.ts`);
 			if (!fs.existsSync(webworkerFile)) {
 				return;
 			}
-			map[`dist/workers/DT-${folder}.generator.js`] = [`src/plugins/dataTypes/${folder}/${folder}.generator.ts`];
+			map[`dist/workers/DT-${folder}.worker.js`] = [`src/plugins/dataTypes/${folder}/${folder}.worker.ts`];
 		});
 
 		return map;
@@ -210,19 +213,18 @@ window.gd.localeLoaded(i18n);
 
 		const map = {};
 		folders.forEach((folder) => {
-			const webworkerFile = path.join(__dirname, `/src/plugins/exportTypes/${folder}/${folder}.generator.ts`);
+			const webworkerFile = path.join(__dirname, `/src/plugins/exportTypes/${folder}/${folder}.worker.ts`);
 			if (!fs.existsSync(webworkerFile)) {
 				return;
 			}
-			map[`dist/workers/ET-${folder}.generator.js`] = [`src/plugins/exportTypes/${folder}/${folder}.generator.ts`];
+			map[`dist/workers/ET-${folder}.worker.js`] = [`src/plugins/exportTypes/${folder}/${folder}.worker.ts`];
 		});
 
 		return map;
 	})();
 
 	const webWorkerFileListWithType = [
-		{ file: 'src/core/generator/dataTypes.worker.ts', type: 'core' },
-		{ file: 'src/core/generator/exportTypes.worker.ts', type: 'core' },
+		{ file: 'src/core/generator/generation.worker.ts', type: 'core' },
 		{ file: 'src/utils/workerUtils.ts', type: 'core' }
 	];
 	Object.values(dataTypeWebWorkerMap).forEach((dt) => {
@@ -254,6 +256,8 @@ window.gd.localeLoaded(i18n);
 				target = `dist/workers/${filename}`;
 			}
 
+			// TODO detect when the command is run and look for the generated __hash-[filename] content, then update
+			// __
 			commands[`buildWebWorker${index}`] = {
 				command: `npx rollup -c --config-src=${file} --config-target=${target}`
 			};
@@ -270,8 +274,7 @@ window.gd.localeLoaded(i18n);
 	//
 	//      Core workers:
 	//          __hash-core.worker
-	//          __hash-dataTypes.worker
-	//          __hash-exportTypes.worker
+	//          __hash-generation.worker
 	//          __hash-workerUtils
 	// we then use that information here to check to see if we need to regenerate or not
 	const getWebWorkerBuildCommandNames = () => {
@@ -313,25 +316,18 @@ window.gd.localeLoaded(i18n);
 		const oldFile = path.basename(oldPath);
 		const newFilename = path.basename(fileChanges[0].newPath);
 
-		if (oldPath === 'dist/workers/core.worker.js') {
-			webWorkerMap.coreWorker = newFilename;
-		} else if (oldPath === 'dist/workers/dataTypes.worker.js') {
-			webWorkerMap.coreDataTypeWorker = newFilename;
-		} else if (oldPath === 'dist/workers/exportTypes.worker.js') {
-			webWorkerMap.coreExportTypeWorker = newFilename;
+		if (oldPath === 'dist/workers/generation.worker.js') {
+			webWorkerMap.generationWorker = newFilename;
 		} else if (oldPath === 'dist/workers/workerUtils.js') {
 			webWorkerMap.workerUtils = newFilename;
 		} else {
 			const [pluginFolder] = oldFile.split('.');
-			const cleanPluginFolder = pluginFolder.replace(/^(DT-|ET-|C-)/, '');
+			const cleanPluginFolder = pluginFolder.replace(/^(DT-|ET-)/, '');
 
 			if (/^DT-/.test(oldFile)) {
 				webWorkerMap.dataTypes[cleanPluginFolder] = newFilename;
 			} else if (/^ET-/.test(oldFile)) {
 				webWorkerMap.exportTypes[cleanPluginFolder] = newFilename;
-			} else {
-				const countryFolder = path.basename(oldPath, path.extname(oldPath)).replace(/(C-)/, '');
-				webWorkerMap.countries[countryFolder] = newFilename;
 			}
 		}
 	};
@@ -475,6 +471,45 @@ window.gd.localeLoaded(i18n);
 		i18n.removeKeyFromI18nFiles(grunt.option('key'));
 	});
 
+	grunt.registerTask('addLocale', () => {
+		const locale = grunt.option('locale') || null;
+		if (!locale) {
+			grunt.fail.fatal("Please enter a locale to add. Locales should be the ISO-3166 2-char code: `grunt addLocale --locale=xy");
+		}
+
+		const dataTypes = fs.readdirSync(dataTypesFolder);
+		dataTypes.forEach((folder) => {
+			const en = `${dataTypesFolder}/${folder}/i18n/en.json`;
+			const newLocaleFile = `${dataTypesFolder}/${folder}/i18n/${locale}.json`;
+			if (fs.existsSync(en)) {
+				fs.copyFileSync(en, newLocaleFile);
+			}
+		});
+
+		const exportTypes = fs.readdirSync(exportTypesFolder);
+		exportTypes.forEach((folder) => {
+			const en = `${exportTypesFolder}/${folder}/i18n/en.json`;
+			const newLocaleFile = `${exportTypesFolder}/${folder}/i18n/${locale}.json`;
+			if (fs.existsSync(en)) {
+				fs.copyFileSync(en, newLocaleFile);
+			}
+		});
+
+		const countries = fs.readdirSync(countriesFolder);
+		countries.forEach((folder) => {
+			const en = `${countriesFolder}/${folder}/i18n/en.json`;
+			const newLocaleFile = `${countriesFolder}/${folder}/i18n/${locale}.json`;
+			if (fs.existsSync(en)) {
+				fs.copyFileSync(en, newLocaleFile);
+			}
+		});
+
+		// main translation file
+		const mainEn = `${mainTranslationsFolder}/en.json`;
+		if (fs.existsSync(mainEn)) {
+			fs.copyFileSync(mainEn, `${mainTranslationsFolder}/${locale}.json`);
+		}
+	});
 
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
 	grunt.loadNpmTasks('grunt-contrib-copy');

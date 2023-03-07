@@ -1,17 +1,7 @@
 import * as React from 'react';
 import RadioPill, { RadioPillRow } from '~components/pills/RadioPill';
 import etShared from '../../../styles/etShared.scss';
-import { ETDownloadPacket, ETDownloadPacketResponse, ETSettings, ETState } from '~types/exportTypes';
-
-export type JavascriptExportFormat = 'variable' | 'es6' | 'commonJs';
-export interface ProgrammingLanguageState extends ETState {
-	jsExportFormat: JavascriptExportFormat;
-}
-
-export const initialState: ProgrammingLanguageState = {
-	jsExportFormat: 'variable',
-	isValid: true
-};
+import { ETDownloadPacket, ETDownloadPacketResponse, ETSettings } from '~types/exportTypes';
 
 export const Settings = ({ i18n, id, data, onUpdate }: ETSettings): JSX.Element => {
 	const onChange = (prop: string, value: any): void => {

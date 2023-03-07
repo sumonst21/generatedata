@@ -1,7 +1,6 @@
-## Email Data Type
+# [Docs](../../../../../docs/README.md) &raquo; [Plugins](../../README.md) &raquo; [Data Types](../README.md) &raquo; Email
 
 This Data Type generates a random email address. 
-
 
 ### Example API Usage
 

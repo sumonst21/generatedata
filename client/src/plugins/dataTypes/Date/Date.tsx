@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { format, subYears, addYears, fromUnixTime } from 'date-fns';
+import { format, fromUnixTime } from 'date-fns';
 import { LocalizedDatePicker, LocalizedDatePickerProvider } from '~components/datePicker/LocalizedDatePicker.component';
 import Button from '@material-ui/core/Button';
 import Dropdown from '~components/dropdown/Dropdown';
@@ -10,25 +10,11 @@ import { ErrorTooltip } from '~components/tooltips';
 import TextField from '~components/TextField';
 import CopyToClipboard from '~components/copyToClipboard/CopyToClipboard';
 import * as sharedStyles from '../../../styles/shared.scss';
+import { DateState, GenerationOptionsType } from './Date.state';
 import * as styles from './Date.scss';
 import C from '../../../core/constants';
 
-
-export type DateState = {
-	fromDate: number;
-	toDate: number;
-	example: string;
-	format: string;
-};
-
-export const initialState: DateState = {
-	fromDate: parseInt(format(subYears(new Date(), 1), 't'), 10),
-	toDate: parseInt(format(addYears(new Date(), 1), 't'), 10),
-	example: 'MMM d, y',
-	format: 'MMM d, y'
-};
-
-export const rowStateReducer = ({ fromDate, toDate, format }: DateState): Partial<DateState> => ({
+export const rowStateReducer = ({ fromDate, toDate, format }: DateState): GenerationOptionsType => ({
 	fromDate, toDate, format
 });
 
@@ -93,9 +79,18 @@ export const Example = ({ i18n, data, onUpdate }: DTExampleProps): JSX.Element =
 	);
 };
 
+
+// N.B. The DatePicker component is out of date now. There appears to be a bug where even though setting the right date
+// it doesn't show it properly. This happens all the time when clicking on the "to" field (the second one). That shows
+// the first date. Soon as you click out of the dialog, you can see it set itself to right value. Clicking again shows
+// the right value. I couldn't find any doc about this issue & I don't recall it occurring with earlier versions of this
+// code. Upgrading is probably the best option but that's a lot of work, so for now there are two pickers, one for From and
+// To each. Klutzy, but functional.
 export const Options = ({ data, onUpdate, i18n, coreI18n }: DTOptionsProps): JSX.Element => {
-	const [isOpen, setOpen] = React.useState(false);
+	const [fromDatePickerOpen, setFromDatePickerOpen] = React.useState(false);
+	const [toDatePickerOpen, setToDatePickerOpen] = React.useState(false);
 	const [selectedDatePicker, setDatePicker] = React.useState('fromDate');
+
 	const onChange = (field: string, value: any): void => {
 		onUpdate({
 			...data,
@@ -105,12 +100,17 @@ export const Options = ({ data, onUpdate, i18n, coreI18n }: DTOptionsProps): JSX
 
 	const onBtnClick = (btn: string): void => {
 		setDatePicker(btn);
-		setOpen(true);
+		if (btn === 'fromDate') {
+			setFromDatePickerOpen(true);
+		} else {
+			setToDatePickerOpen(true);
+		}
 	};
 
 	const onSelectDate = (btn: string, value: any): void => {
-		onChange(btn, value);
-		setOpen(false);
+		onChange(btn, parseInt(value, 10));
+		setFromDatePickerOpen(false);
+		setToDatePickerOpen(false);
 	};
 
 	let toDateClass = styles.dateBtn;
@@ -152,11 +152,19 @@ export const Options = ({ data, onUpdate, i18n, coreI18n }: DTOptionsProps): JSX
 				<div style={{ display: 'none' }}>
 					<LocalizedDatePicker
 						autoOk
-						open={isOpen}
+						open={fromDatePickerOpen}
 						className={styles.dateField}
-						value={fromUnixTime(selectedDatePicker === 'fromDate' ? data.fromDate : data.toDate)}
+						value={fromUnixTime(data.fromDate)}
 						onChange={(val: any): void => onSelectDate(selectedDatePicker, format(val, 't'))}
-						onClose={(): void => setOpen(false)}
+						onClose={(): void => setFromDatePickerOpen(false)}
+					/>
+					<LocalizedDatePicker
+						autoOk
+						open={toDatePickerOpen}
+						className={styles.dateField}
+						value={fromUnixTime(data.toDate)}
+						onChange={(val: any): void => onSelectDate(selectedDatePicker, format(val, 't'))}
+						onClose={(): void => setToDatePickerOpen(false)}
 					/>
 				</div>
 			</div>

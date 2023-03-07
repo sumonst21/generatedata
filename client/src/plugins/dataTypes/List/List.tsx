@@ -8,32 +8,8 @@ import TextField from '~components/TextField';
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '~components/dialogs';
 import { Tooltip } from '~components/tooltips';
 import * as langUtils from '~utils/langUtils';
+import { ListType, ListState, GenerationOptionsType } from './List.state';
 import * as styles from './List.scss';
-
-export const enum ListType {
-	exactly = 'exactly',
-	between = 'between'
-}
-
-export type ListState = {
-	example: string;
-	listType: ListType;
-	exactly: string;
-	betweenLow: string;
-	betweenHigh: string;
-	values: string[];
-	delimiter: string;
-};
-
-export const initialState: ListState = {
-	example: '1|3|5|7|9|11|13|15|17|19',
-	listType: ListType.exactly,
-	exactly: '1',
-	betweenLow: '',
-	betweenHigh: '',
-	values: ['1', '3', '5', '7', '9', '11', '13', '15', '17', '19'],
-	delimiter: ', '
-};
 
 export const Example = ({ data, onUpdate, i18n }: DTExampleProps): JSX.Element => {
 	const onChange = (example: any): void => {
@@ -229,7 +205,7 @@ export const Options = ({ coreI18n, i18n, data, id, onUpdate }: DTOptionsProps):
 	let label;
 	if (safeData.listType === ListType.exactly) {
 		if (safeData.exactly === '1') {
-			label = langUtils.getI18nString(i18n.exactly1Item, [`<b>1</b>`]);
+			label = langUtils.getI18nString(i18n.exactly1Item, ['<b>1</b>']);
 		} else {
 			label = langUtils.getI18nString(i18n.exactlyNItems, [`<b>${safeData.exactly}</b>`]);
 		}
@@ -239,13 +215,13 @@ export const Options = ({ coreI18n, i18n, data, id, onUpdate }: DTOptionsProps):
 		label = langUtils.getI18nString(i18n.betweenNumItems, [`<b>${safeData.betweenLow}</b>`, `<b>${safeData.betweenHigh}</b>`]);
 	} else if (safeData.betweenLow) {
 		if (safeData.betweenLow === '1') {
-			label = langUtils.getI18nString(i18n.atLeast1Item, [`<b>1</b>`]);
+			label = langUtils.getI18nString(i18n.atLeast1Item, ['<b>1</b>']);
 		} else {
 			label = langUtils.getI18nString(i18n.atLeastNItems, [`<b>${safeData.betweenLow}</b>`]);
 		}
 	} else {
 		if (safeData.betweenHigh === '1') {
-			label = langUtils.getI18nString(i18n.atMost1Item, [`<b>1</b>`]);
+			label = langUtils.getI18nString(i18n.atMost1Item, ['<b>1</b>']);
 		} else {
 			label = langUtils.getI18nString(i18n.atMostNItems, [`<b>${safeData.betweenHigh}</b>`]);
 		}
@@ -296,15 +272,10 @@ export const getMetadata = (): DTMetadata => ({
 	}
 });
 
-// @ts-ignore-line
-export const rowStateReducer = ({ example, delimiter, listType, exactly, betweenLow = '', atMost, betweenHigh = '', values }: ListState): any => {
+export const rowStateReducer = ({ delimiter, listType, exactly, betweenLow = '', betweenHigh = '', values }: ListState): GenerationOptionsType => {
 	let cleanExactly: any = '';
 	let cleanBetweenLow: any = '';
 	let cleanBetweenHigh: any = '';
-
-	if (atMost) {
-		betweenHigh = atMost;
-	}
 
 	if (listType === ListType.exactly) {
 		if (exactly.trim() !== '') {
@@ -330,7 +301,6 @@ export const rowStateReducer = ({ example, delimiter, listType, exactly, between
 	}
 
 	return {
-		example,
 		listType,
 		exactly: cleanExactly,
 		betweenLow: cleanBetweenLow,

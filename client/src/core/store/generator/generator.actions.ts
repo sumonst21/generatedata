@@ -19,6 +19,7 @@ import { DataSetListItem } from '~types/dataSets';
 import { getUnique } from '~utils/arrayUtils';
 import { getCountryNamesBundle } from '~utils/coreUtils';
 import { getCountryData } from '~utils/countryUtils';
+import { GenerationWorkerActionType } from '~core/generator/generation.types';
 
 export const ADD_ROWS = 'ADD_ROWS';
 export const addRows = (numRows: number): GDAction => ({
@@ -51,15 +52,16 @@ export const onChangeTitle = (id: string, value: string): any => async (dispatch
 	});
 };
 
-export const SELECT_DATA_TYPE = 'SELECT_DATA_TYPE';
-export const onSelectDataType = (dataType: DataTypeFolder, gridRowId?: string): any => (
-	(dispatch: any, getState: any): any => loadDataTypeBundle(dispatch, getState, dataType, { gridRowId })
-);
-
 export type LoadDataTypeBundleOptions = {
 	gridRowId?: string;
 	shouldRefreshPreviewPanel?: boolean;
+	onLoadComplete?: (dataType: DataTypeFolder) => void;
 };
+
+export const SELECT_DATA_TYPE = 'SELECT_DATA_TYPE';
+export const onSelectDataType = (dataType: DataTypeFolder, opts: LoadDataTypeBundleOptions = {}): any => (
+	(dispatch: any, getState: any): any => loadDataTypeBundle(dispatch, getState, dataType, opts)
+);
 
 export const loadDataTypeBundle = (dispatch: Dispatch, getState: any, dataType: DataTypeFolder, opts: LoadDataTypeBundleOptions = {}): void => {
 	const options = {
@@ -101,6 +103,12 @@ export const loadDataTypeBundle = (dispatch: Dispatch, getState: any, dataType: 
 
 			if (options.shouldRefreshPreviewPanel) {
 				dispatch(refreshPreview(ids));
+			}
+
+			// workaround to allow batch loading a bunch of different Data Types onload, and have the callee track what's
+			// been loaded to know when to do the refreshPreview() call
+			if (options.onLoadComplete) {
+				options.onLoadComplete(dataType);
 			}
 		});
 };
@@ -167,7 +175,7 @@ export const REFRESH_PREVIEW_DATA = 'REFRESH_PREVIEW_DATA';
 // this re-generates the preview panel data. This doesn't have to be called on boot-up because the preview data is
 // generated on the fly, saved in the store and rehydrated when the app loads
 export const refreshPreview = (idsToRefresh: string[] = [], onComplete: any = null): any => {
-	const dataTypeWorker = coreUtils.getDataTypeWorker('preview');
+	const generationWorker = coreUtils.getGenerationWorker('preview');
 
 	return (dispatch: any, getState: any): any => {
 		const state = getState();
@@ -187,7 +195,8 @@ export const refreshPreview = (idsToRefresh: string[] = [], onComplete: any = nu
 		// here we DO need to generate the data independently of the final string in the appropriate export type format.
 		// That allows us to tease out what changes on each keystroke in the UI and only refresh specific fields - it's
 		// far clearer to the end user that way
-		dataTypeWorker.postMessage({
+		generationWorker.postMessage({
+			action: GenerationWorkerActionType.ProcessDataTypesOnly,
 			numResults: C.MAX_PREVIEW_ROWS,
 			batchSize: C.MAX_PREVIEW_ROWS,
 			unchanged,
@@ -195,22 +204,21 @@ export const refreshPreview = (idsToRefresh: string[] = [], onComplete: any = nu
 			i18n,
 			template,
 			countryNames: coreUtils.getCountryNames(),
-			workerResources: {
-				workerUtils: coreUtils.getWorkerUtils(),
-				dataTypes: coreUtils.getDataTypeWorkerMap(selectors.getRowDataTypes(state) as DataTypeFolder[]),
-				countryData: getCountryData()
-			}
+			workerUtilsUrl: coreUtils.getWorkerUtilsUrl(),
+			dataTypeWorkerMap: coreUtils.getDataTypeWorkerMap(selectors.getRowDataTypes(state) as DataTypeFolder[]),
+			countryData: getCountryData()
 		});
 
-		dataTypeWorker.onmessage = (resp: MessageEvent): void => {
-			const { data } = resp;
-			const { generatedData } = data;
+		generationWorker.onmessage = (e: MessageEvent): void => {
+			if (e.data.event !== GenerationWorkerActionType.DataTypesProcessed) {
+				return;
+			}
+			const { generatedData } = e.data.data;
 
 			columns.forEach(({ id }, index: number) => {
 				if (idsToRefresh.length && idsToRefresh.indexOf(id) === -1) {
 					return;
 				}
-
 				dataTypePreviewData[id] = generatedData.map((row: any): any => row[index]);
 			});
 
@@ -265,8 +273,13 @@ export const toggleExportSettings = (tab?: ExportSettingsTab): GDAction => ({
 export const HIDE_EXPORT_SETTINGS = 'HIDE_EXPORT_SETTINGS';
 export const hideExportSettings = (): GDAction => ({ type: HIDE_EXPORT_SETTINGS });
 
+export type LoadExportTypeBundleOptions = {
+	shouldRefreshPreviewPanel?: boolean;
+	onLoadComplete?: (exportType: ExportTypeFolder) => void;
+}
+
 export const SELECT_EXPORT_TYPE = 'SELECT_EXPORT_TYPE';
-export const onSelectExportType = (exportType: ExportTypeFolder, shouldRefreshPreviewPanel = true): any => {
+export const onSelectExportType = (exportType: ExportTypeFolder, opts: LoadExportTypeBundleOptions = {}): any => {
 	return (dispatch: any): any => {
 		dispatch({
 			type: SELECT_EXPORT_TYPE,
@@ -279,8 +292,11 @@ export const onSelectExportType = (exportType: ExportTypeFolder, shouldRefreshPr
 			.then((bundle: DTBundle) => {
 				dispatch(exportTypeLoaded(exportType, bundle.initialState));
 
-				if (shouldRefreshPreviewPanel) {
+				if (opts.shouldRefreshPreviewPanel) {
 					dispatch(refreshPreview());
+				}
+				if (opts.onLoadComplete) {
+					opts.onLoadComplete(exportType);
 				}
 			});
 	};
@@ -316,6 +332,12 @@ export const showHelpDialog = (dataType: DataTypeFolder): GDAction => ({
 		dataType
 	}
 });
+
+export const SHOW_SCHEMA_DIALOG = 'SHOW_SCHEMA_DIALOG';
+export const showDataTemplateDialog = (): GDAction => ({ type: SHOW_SCHEMA_DIALOG });
+
+export const HIDE_SCHEMA_DIALOG = 'HIDE_SCHEMA_DIALOG';
+export const hideSchemaDialog = (): GDAction => ({ type: HIDE_SCHEMA_DIALOG });
 
 export const HIDE_HELP_DIALOG = 'HIDE_HELP_DIALOG';
 export const hideHelpDialog = (): GDAction => ({ type: HIDE_HELP_DIALOG });
@@ -385,7 +407,7 @@ export const loadDataSet = (dataSet: DataSetListItem, showToast = true): any => 
 	});
 
 	// load all the datasets and export type
-	dispatch(onSelectExportType(exportType, false));
+	dispatch(onSelectExportType(exportType, { shouldRefreshPreviewPanel: false }));
 	uniqueDataTypes.forEach((dataType: DataTypeFolder) => (
 		loadDataTypeBundle(dispatch, getState, dataType, { shouldRefreshPreviewPanel: false })
 	));

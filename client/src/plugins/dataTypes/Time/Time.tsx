@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { format, startOfDay, endOfDay, fromUnixTime, parse } from 'date-fns';
+import { format, fromUnixTime, parse } from 'date-fns';
 import Dropdown from '~components/dropdown/Dropdown';
 import ArrowRightAlt from '@material-ui/icons/ArrowRightAlt';
 import TextField from '@material-ui/core/TextField';
@@ -7,32 +7,16 @@ import CoreTextField from '~components/TextField';
 import CopyToClipboard from '~components/copyToClipboard/CopyToClipboard';
 import { DTExampleProps, DTHelpProps, DTMetadata, DTOptionsProps } from '~types/dataTypes';
 import { ErrorTooltip } from '~components/tooltips';
+import { DateState, GenerationOptionsType } from './Time.state';
 import * as styles from './Time.scss';
 import * as sharedStyles from '../../../styles/shared.scss';
 
-
-export type DateState = {
-	fromTime: number;
-	toTime: number;
-	example: string;
-	format: string;
-};
-
-export const initialState: DateState = {
-	fromTime: parseInt(format(startOfDay(new Date()), 't'), 10),
-	toTime: parseInt(format(endOfDay(new Date()), 't'), 10),
-	example: 'h:mm a',
-	format: 'h:mm a'
-};
-
 const SECS_IN_DAY = 86400;
-export const rowStateReducer = ({ fromTime, toTime, format }: DateState): Partial<DateState> => {
-	return {
-		fromTime,
-		toTime: fromTime > toTime ? toTime + SECS_IN_DAY : toTime,
-		format
-	};
-};
+export const rowStateReducer = ({ fromTime, toTime, format }: DateState): GenerationOptionsType => ({
+	fromTime,
+	toTime: fromTime > toTime ? toTime + SECS_IN_DAY : toTime,
+	format
+});
 
 export const getMetadata = (): DTMetadata => ({
 	general: {

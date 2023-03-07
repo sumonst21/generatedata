@@ -7,17 +7,17 @@ import Slider from '@material-ui/core/Slider';
 import Button from '@material-ui/core/Button';
 import Pause from '@material-ui/icons/Pause';
 import PlayArrow from '@material-ui/icons/PlayArrow';
-import ExpandMore from "@material-ui/icons/ExpandMore";
+import ExpandMore from '@material-ui/icons/ExpandMore';
 import { Dialog, DialogContent, DialogTitle, DialogActions } from '~components/dialogs';
 import usePrevious from '../../hooks/usePrevious';
 import styles from './ActivityPanel.scss';
 import { DataPacket } from '~store/packets/packets.reducer';
 import * as coreUtils from '~utils/coreUtils';
-import C from '../constants';
 import { Tooltip } from '~components/tooltips';
 import { getPercentageLabel } from './generation.helpers';
 import Engine from './Engine.container';
 import { LoadTimeGraphDuration } from '~types/general';
+import { GenerationWorkerActionType } from '~core/generator/generation.types';
 
 export type ActivityPanelProps = {
 	visible: boolean;
@@ -49,17 +49,17 @@ const ActivityPanel = ({
 	}
 
 	const coreI18n = fullI18n.core;
-	const { isPaused, config, dataTypeWorkerId, numGeneratedRows, speed } = packet;
+	const { isPaused, config, generationWorkerId, numGeneratedRows, speed } = packet;
 	const { numRowsToGenerate } = config;
 
 	const [dimensions, setDimensions] = React.useState<any>({ height: 0, width: 0 });
 	const prevGeneratedRows = usePrevious(numGeneratedRows);
-	const dataTypeWorker = coreUtils.getDataTypeWorker(dataTypeWorkerId);
+	const generationWorker = coreUtils.getGenerationWorker(generationWorkerId);
 
 	const abortPacket = (): void => {
 		onAbort();
-		dataTypeWorker.postMessage({ action: C.ACTIVITY_PANEL_ACTIONS.ABORT });
-		coreUtils.destroyDataTypeWorker(dataTypeWorkerId);
+		generationWorker.postMessage({ action: GenerationWorkerActionType.Abort });
+		coreUtils.destroyGenerationWorker(generationWorkerId);
 	};
 
 	const percentage = (numGeneratedRows / numRowsToGenerate) * 100;

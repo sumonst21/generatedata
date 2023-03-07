@@ -12,28 +12,10 @@ import { DTExampleProps, DTHelpProps, DTMetadata, DTOptionsProps } from '~types/
 import CreatablePillField from '~components/creatablePillField/CreatablePillField';
 import { countryList } from '../../../../_plugins';
 import { CountryType } from '~types/countries';
+import { NamesState, NamesSource, GenerationOptionsType } from './Names.state';
 import styles from './Names.scss';
 
-export const enum NamesSource {
-	any = 'any',
-	countries = 'countries'
-}
-
-export type NamesState = {
-	example: string;
-	options: string[];
-	source: NamesSource;
-	selectedCountries: string[];
-};
-
-export const initialState: NamesState = {
-	example: 'Name Surname',
-	options: ['Name Surname'],
-	source: NamesSource.any,
-	selectedCountries: []
-};
-
-export const rowStateReducer = ({ options, source, selectedCountries }: NamesState): Partial<NamesState> => ({
+export const rowStateReducer = ({ options, source, selectedCountries }: NamesState): GenerationOptionsType => ({
 	options,
 	source,
 	selectedCountries

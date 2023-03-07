@@ -1,4 +1,4 @@
-## TextFixed Data Type
+# [Docs](../../../../../docs/README.md) &raquo; [Plugins](../../README.md) &raquo; [Data Types](../README.md) &raquo; TextFixed
 
 This Data Type generates a fixed number of random words.  
 

@@ -11,9 +11,9 @@ import { ErrorTooltip } from '~components/tooltips';
 import { MediumSpinner } from '~components/loaders/loaders';
 import Engine from './Engine.container';
 import { DataPacket } from '~store/packets/packets.reducer';
-import C from '~core/constants';
 import * as coreUtils from '~utils/coreUtils';
 import CheckIcon from '@material-ui/icons/Check';
+import { GenerationWorkerActionType } from '~core/generator/generation.types';
 
 export type GenerationSettingsProps = {
 	visible: boolean;
@@ -100,13 +100,13 @@ const GenerationSettingsPanel = ({
 
 	const closeModal = (): void => {
 		if (packet) {
-			const { dataTypeWorkerId } = packet;
-			const dataTypeWorker = coreUtils.getDataTypeWorker(dataTypeWorkerId);
+			const { generationWorkerId } = packet;
+			const generationWorker = coreUtils.getGenerationWorker(generationWorkerId);
 
 			onAbort();
 			onClose();
-			dataTypeWorker.postMessage({ action: C.ACTIVITY_PANEL_ACTIONS.ABORT });
-			coreUtils.destroyDataTypeWorker(dataTypeWorkerId);
+			generationWorker.postMessage({ action: GenerationWorkerActionType.Abort });
+			coreUtils.destroyGenerationWorker(generationWorkerId);
 		} else {
 			onClose();
 		}
@@ -149,17 +149,22 @@ const GenerationSettingsPanel = ({
 						</div>
 					</DialogContent>
 					<DialogActions>
-						{cancelButton}
-						<Button
-							type="submit"
-							onClick={actionButtonClick}
-							color="primary"
-							disabled={actionButtonDisabled}
-							disableElevation
-							variant="contained"
-						>
-							{buttonLabel}
-						</Button>
+						<div style={{ display: 'flex', width: '100%' }}>
+							<div style={{ flex: 1 }} />
+							<div>
+								{cancelButton}
+								<Button
+									type="submit"
+									onClick={actionButtonClick}
+									color="primary"
+									disabled={actionButtonDisabled}
+									disableElevation
+									variant="contained"
+								>
+									{buttonLabel}
+								</Button>
+							</div>
+						</div>
 					</DialogActions>
 				</div>
 			</Dialog>

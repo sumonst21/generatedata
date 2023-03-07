@@ -23,14 +23,11 @@ export type GridProps = {
 	showHelpDialog: (section: DataTypeFolder) => void;
 };
 
-
 const Grid = ({
-	rows, onAddRows, onSort, i18n, columnTitle, toggleGrid, changeSmallScreenVisiblePanel,
-	showHelpDialog
+	rows, onAddRows, onSort, i18n, columnTitle, toggleGrid, changeSmallScreenVisiblePanel, showHelpDialog
 }: GridProps): JSX.Element => {
 	const [numRows, setNumRows] = React.useState(1);
 	const [dimensions, setDimensions] = React.useState<any>({ height: 0, width: 0 });
-
 	const windowSize = useWindowSize();
 
 	let gridSizeClass = '';
@@ -62,16 +59,18 @@ const Grid = ({
 
 	return (
 		<>
-			<div style={{ position: 'fixed', right: 0, padding: 10 }} onClick={onClose}>
-				<Tooltip
-					title={<span dangerouslySetInnerHTML={{ __html: i18n.closePanel }}/>}
-					placement="bottom"
-					arrow
-				>
-					<IconButton size="small" aria-label={i18n.closePanel}>
-						<CloseIcon fontSize="large" />
-					</IconButton>
-				</Tooltip>
+			<div style={{ position: 'fixed', right: 0, padding: 10 }}>
+				<span onClick={onClose}>
+					<Tooltip
+						title={<span dangerouslySetInnerHTML={{ __html: i18n.closePanel }}/>}
+						placement="bottom"
+						arrow
+					>
+						<IconButton size="small" aria-label={i18n.closePanel}>
+							<CloseIcon fontSize="large" />
+						</IconButton>
+					</Tooltip>
+				</span>
 			</div>
 
 			<Measure
@@ -82,7 +81,7 @@ const Grid = ({
 					<div className={`${styles.gridWrapper} ${gridSizeClass}`} ref={measureRef}>
 						<div>
 							<div className={styles.gridHeaderWrapper}>
-								<div className={`${styles.gridRow} ${styles.gridHeader} tour-gridHeader`} style={{ flex: `0 0 auto` }}>
+								<div className={`${styles.gridRow} ${styles.gridHeader} tour-gridHeader`} style={{ flex: '0 0 auto' }}>
 									<div className={styles.orderCol}>{rows.length}</div>
 									<div className={styles.dataTypeCol}>
 										{i18n.dataType}

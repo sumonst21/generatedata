@@ -6,29 +6,13 @@ import RadioPill, { RadioPillRow } from '~components/pills/RadioPill';
 import Dropdown, { DropdownOption } from '~components/dropdown/Dropdown';
 import styles from './Track1.scss';
 
-export type Track1Source = 'row' | 'random';
-
-export type Track1State = {
-	panSource: Track1Source;
-	targetPanRowId: string;
-	nameSource: Track1Source;
-	targetNameRowId: string;
-}
-
-export const initialState: Track1State = {
-	panSource: 'random',
-	targetPanRowId: '',
-	nameSource: 'random',
-	targetNameRowId: ''
-};
-
 const Track1Dialog = ({
 	visible, data, id, panRows, nameRows, onClose, onUpdatePANSource, onUpdateNameSource, onUpdateRowSource, coreI18n,
 	i18n
 }: any): JSX.Element => {
 
 	const getPanSourceDropdown = (): JSX.Element | null => {
-		if (data.panSource !== "row") {
+		if (data.panSource !== 'row') {
 			return null;
 		}
 
@@ -47,7 +31,7 @@ const Track1Dialog = ({
 	};
 
 	const getNameSourceDropdown = (): JSX.Element | null => {
-		if (data.nameSource !== "row") {
+		if (data.nameSource !== 'row') {
 			return null;
 		}
 

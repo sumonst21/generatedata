@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { gql } from '@apollo/client';
 import Cookies from 'js-cookie';
 import env from '../../../../_env';
@@ -15,32 +15,14 @@ import * as mainSelectors from '~store/main/main.selectors';
 import { addToast } from '~utils/generalUtils';
 import * as langUtils from '~utils/langUtils';
 
-// import { setAuthTokenRefresh } from '~utils/authUtils';
-
 const googleBtnId = 'google-signin-button';
-
-const init = (): void => {
-	window.gapi.load('client:auth2', (): void => {
-		/* eslint-disable @typescript-eslint/camelcase */
-		const auth2 = window.gapi.auth2.init({ client_id: env.googleAuthClientId, scope: 'profile' });
-
-		auth2.isSignedIn.listen((isSignedIn: any): void => {
-			if (isSignedIn) {
-				onAuthenticated(auth2.currentUser.get(), { onPageRender: true });
-			}
-		});
-	});
-};
-
 
 export const initGoogleAuth = (): void => {
 	const script = document.createElement('script');
-	script.src = 'https://apis.google.com/js/platform.js?onload=initGoogleAuth';
+	script.src = 'https://accounts.google.com/gsi/client';
 	script.async = true;
 	script.defer = true;
 	document.body.appendChild(script);
-
-	window.initGoogleAuth = init;
 };
 
 export type AuthenticatedOptions = {
@@ -59,14 +41,18 @@ const onAuthenticated = async (googleUser: any, opts: AuthenticatedOptions = {})
 
 	if (isLoggedIn) {
 		store.dispatch(setAuthenticated(true));
+
+		// needed to complete the page load
 		store.dispatch(setOnloadAuthDetermined());
 	} else {
-		const googleToken = googleUser.getAuthResponse().id_token;
+		const googleToken = googleUser.credential;
 		const response = await apolloClient.mutate({
 			mutation: gql`
                 mutation LoginWithGoogle($googleToken: String!) {
                     loginWithGoogle(googleToken: $googleToken) {
                         token
+                        refreshToken
+                        tokenExpiry
                         success
                         error
                         firstName
@@ -94,50 +80,52 @@ const onAuthenticated = async (googleUser: any, opts: AuthenticatedOptions = {})
 			}));
 
 			Cookies.set('refreshToken', refreshToken, { expires: new Date(tokenExpiry) });
-			onLoginSuccess(null, options.onPageRender, store.dispatch);
+			onLoginSuccess(tokenExpiry, options.onPageRender, store.dispatch);
 		} else {
 			if (response.data.loginWithGoogle.error === 'accountExpired') {
 				addToast({
 					type: 'error',
 					message: i18n.core.accountExpiredMsg
 				});
-				logoutGoogle();
 			} else if (response.data.loginWithGoogle.error === 'noUserAccount') {
 				addToast({
 					type: 'error',
 					message: i18n.core.userAccountNotFound
 				});
-				logoutGoogle();
 			}
 		}
 	}
 };
 
-export const onLoginPanelRender = (): void => {
-	const observer = new MutationObserver((): void => {
-		if (document.contains(document.getElementById(googleBtnId)) && window.gapi) {
-			window.gapi.signin2.render(googleBtnId, {
-				scope: 'profile email',
-				width: 210,
-				height: 42,
-				longtitle: true,
-				theme: 'dark'
-			});
-			observer.disconnect();
+export const SignInWithGoogleButton = (): JSX.Element => {
+	const divRef = useRef(null);
+	const [loaded, setLoaded] = React.useState(false);
+
+	React.useEffect(() => {
+		if (divRef.current && !loaded) {
+
+			// TODO still need to execute something here for scenarios where script takes too long to load.
+			setLoaded(true);
+
+			// timeout seems to be needed for the fade-in, perhaps? The DOM element clearly exists at this point but
+			// it won't show. Possibly a conflict with whatever google is doing.
+			setTimeout(() => {
+				if (document.contains(document.getElementById(googleBtnId)) && window.google) {
+					window.google.accounts.id.initialize({
+						/* eslint-disable @typescript-eslint/camelcase */
+						client_id: env.googleAuthClientId,
+						callback: onAuthenticated
+					});
+					window.google.accounts.id.renderButton(
+						document.getElementById(googleBtnId),
+						{ type: 'standard' }
+					);
+				}
+			}, 500);
 		}
-	});
+	}, [divRef.current]);
 
-	observer.observe(document, {
-		attributes: false,
-		childList: true,
-		characterData: false,
-		subtree: true
-	});
+	return <div ref={divRef} id={googleBtnId} />;
 };
 
-export const SignInWithGoogleButton = (): JSX.Element => <div id={googleBtnId} />;
-
-export const logoutGoogle = (): void => {
-	const auth2 = window.gapi.auth2.getAuthInstance();
-	auth2.signOut();
-};
+SignInWithGoogleButton.displayName = 'SignInWithGoogleButton';

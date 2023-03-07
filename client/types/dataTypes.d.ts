@@ -1,5 +1,6 @@
+// TODO rename to dataTypePlugins.ts
 import { DatabaseTypes } from '../src/plugins/exportTypes/SQL/SQL.types';
-import { AnyObject } from './general';
+import { AnyObject, GenerationTemplate } from './general';
 import { DataTypeFolder } from '../_plugins';
 import { CountryNamesMap, CountryType } from '~types/countries';
 
@@ -43,7 +44,6 @@ export type DTDefinition = {
 	fieldGroup: DTFieldGroup;
 	fieldGroupOrder: number;
 	dependencies?: DataTypeFolder[];
-	schema?: any;
 };
 
 export type DTFieldGroup = 'numeric' | 'geo' | 'humanData' | 'other' | 'financial' | 'text' | 'countrySpecific';
@@ -112,14 +112,16 @@ export type DTGenerationData = {
 	existingRowData: DTGenerationExistingRowData[];
 	countryData: {
 		[key in CountryType]?: any;
-	},
-	workerResources: {
-		workerUtils: string;
-	}
+	};
+	template: GenerationTemplate;
 }
 
-interface DTOnMessage extends MessageEvent {
-	data: DTGenerationData
+export type DTWorkerGenerationData = DTGenerationData & {
+	workerUtilsUrl: string; // this is the URL of the workerUtils worker file
+}
+
+interface DTWorkerOnMessage extends MessageEvent {
+	data: DTWorkerGenerationData;
 }
 
 export type DTGenerationExistingRowData = {

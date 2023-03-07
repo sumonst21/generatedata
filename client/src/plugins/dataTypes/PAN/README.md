@@ -1,4 +1,4 @@
-## PAN Data Type
+# [Docs](../../../../../docs/README.md) &raquo; [Plugins](../../README.md) &raquo; [Data Types](../README.md) &raquo; PAN
 
 This Data Type generates a *valid* Personal Access Number (PAN) for a variety of credit card types.  
 

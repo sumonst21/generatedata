@@ -1,5 +1,6 @@
 import { DTBundle } from '~types/dataTypes';
-import { initialState, Example, Options, Help, rowStateReducer, getMetadata } from './AutoIncrement';
+import { Example, Options, Help, rowStateReducer, getMetadata } from './AutoIncrement';
+import { initialState } from './AutoIncrement.state';
 
 const bundle: DTBundle = {
 	initialState,
@@ -7,7 +8,7 @@ const bundle: DTBundle = {
 	Options,
 	Help,
 	rowStateReducer,
-	getMetadata
+	getMetadata,
 };
 
 export default bundle;

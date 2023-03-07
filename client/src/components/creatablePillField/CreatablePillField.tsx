@@ -67,7 +67,6 @@ export const createOption = (label: string): DropdownOption => ({
 
 const SortableCreatableSelect: any = SortableContainer(CreatableSelect);
 
-
 export type CreatablePillFieldProps = {
 	onChange: (newValues: string[]) => void;
 	value: string[];
@@ -75,14 +74,22 @@ export type CreatablePillFieldProps = {
 	placeholder: string;
 	onValidateNewItem?: (value: string) => boolean;
 	className?: string;
+	isClearable?: boolean;
 }
 
-const CreatablePillField = ({ onChange, onValidateNewItem, value, error, placeholder, className }: CreatablePillFieldProps): JSX.Element => {
+const CreatablePillField = ({
+	onChange,
+	onValidateNewItem,
+	value,
+	error,
+	placeholder,
+	className,
+	isClearable = true
+}: CreatablePillFieldProps): JSX.Element => {
 	const [tempValue, setTempValue] = React.useState('');
 	const options = value.map(createOption);
 
 	const handleInputChange = (newTempValue: string): void => setTempValue(newTempValue);
-
 	const handleKeyDown = (e: any): void => {
 		if (!tempValue) {
 			return;
@@ -115,6 +122,7 @@ const CreatablePillField = ({ onChange, onValidateNewItem, value, error, placeho
 		classes.push(styles.errorField);
 	}
 
+	// onCreateOption={(a: any) => console.log(a)}
 	return (
 		<ErrorTooltip title={error} arrow disableHoverListener={!error} disableFocusListener={!error}>
 			<SortableCreatableSelect
@@ -125,7 +133,7 @@ const CreatablePillField = ({ onChange, onValidateNewItem, value, error, placeho
 				axis="xy"
 				distance={4}
 				getHelperDimensions={({ node }: any): any => node.getBoundingClientRect()}
-				isClearable
+				isClearable={isClearable}
 				isMulti
 				onSortEnd={onSortEnd}
 				menuIsOpen={false}

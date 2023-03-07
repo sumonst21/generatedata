@@ -1,6 +1,7 @@
 import { ColumnData, GenerationActivityPanel, LoadTimeGraphDuration } from '~types/general';
 import { affectedDataTypes } from '~utils/dataTypeUtils';
 import C from '../constants';
+import { UnchangedGenerationData } from '~types/generator';
 
 export const getPercentageLabel = (percentage: number, numRowsToGenerate: number): string => {
 	let decimalPlaces = 0;
@@ -61,7 +62,6 @@ export const getRowGenerationRatePerSecond = (
 
 	// the math below relies on this being correct otherwise we'll get stuck in an infinite loop
 	if (batchEndTime <= batchStartTime) {
-		console.log("-- ", batchEndTime, batchStartTime);
 		throw Error('invalid data passed to getRowGenerationRatePerSecond()');
 	}
 
@@ -116,7 +116,7 @@ export const getRowGenerationRatePerSecond = (
  * data type maps to other data types in whatever way they find useful (e.g. a Composite field just referencing it
  * via its Options field and entering a {{ROWX}} placeholder string).
  */
-export const getUnchangedData = (idsToRefresh: string[], columns: (ColumnData & { id: string })[] , dataTypePreviewData: any): any => {
+export const getUnchangedData = (idsToRefresh: string[], columns: (ColumnData & { id: string })[] , dataTypePreviewData: any): UnchangedGenerationData => {
 	if (!idsToRefresh.length) {
 		return {};
 	}

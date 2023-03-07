@@ -1,5 +1,6 @@
 import { ETBundle } from '~types/exportTypes';
-import { Settings, initialState, getCodeMirrorMode, getDownloadFileInfo, isValid } from './CSV';
+import { Settings, getCodeMirrorMode, getDownloadFileInfo, isValid } from './CSV';
+import { initialState } from './CSV.state';
 
 const bundle: ETBundle = {
 	Settings,
@@ -10,4 +11,3 @@ const bundle: ETBundle = {
 };
 
 export default bundle;
-

@@ -1,4 +1,4 @@
-## List Data Type
+# [Docs](../../../../../docs/README.md) &raquo; [Plugins](../../README.md) &raquo; [Data Types](../README.md) &raquo; List
 
 This Data Type generates a item from a random list. 
 

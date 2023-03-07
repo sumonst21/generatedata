@@ -1,5 +1,6 @@
 import { ETBundle } from '~types/exportTypes';
-import { initialState, Settings, getCodeMirrorMode, getDownloadFileInfo, isValid } from './Typescript';
+import { Settings, getCodeMirrorMode, getDownloadFileInfo, isValid } from './Typescript';
+import { initialState } from './Typescript.state';
 
 const bundle: ETBundle = {
 	initialState,

@@ -1,4 +1,4 @@
-## Track1 Data Type
+# [Docs](../../../../../docs/README.md) &raquo; [Plugins](../../README.md) &raquo; [Data Types](../README.md) &raquo; Track1
 
 This Data Type generates a random Track1 number.
 

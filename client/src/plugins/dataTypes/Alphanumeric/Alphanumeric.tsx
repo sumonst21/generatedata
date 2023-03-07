@@ -3,18 +3,9 @@ import Dropdown from '~components/dropdown/Dropdown';
 import TextField from '~components/TextField';
 import CopyToClipboard from '~components/copyToClipboard/CopyToClipboard';
 import { DTExampleProps, DTOptionsProps, DTHelpProps, DTMetadata } from '~types/dataTypes';
+import { AlphanumericState, GenerationOptionsType } from './Alphanumeric.state';
 import styles from './Alphanumeric.scss';
 import sharedStyles from '../../../styles/shared.scss';
-
-export type AlphanumericState = {
-	example: string;
-	value: string;
-};
-
-export const initialState: AlphanumericState = {
-	example: 'LLLxxLLLxLL',
-	value: 'LLLxxLLLxLL'
-};
 
 const Copy = ({ content, tooltip, message }: any): JSX.Element => (
 	<span className={styles.copy}>
@@ -171,7 +162,7 @@ export const Help = ({ coreI18n, i18n }: DTHelpProps): JSX.Element => (
 	</>
 );
 
-export const rowStateReducer = (state: AlphanumericState): string => state.value;
+export const rowStateReducer = (state: AlphanumericState): GenerationOptionsType => ({ value: state.value });
 
 export const getMetadata = (): DTMetadata => ({
 	sql: {

@@ -5,21 +5,8 @@ import { getLipsumWords } from '~utils/stringUtils';
 import { DTHelpProps, DTMetadata, DTOptionsProps } from '~types/dataTypes';
 import RadioPill, { RadioPillRow } from '~components/pills/RadioPill';
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '~components/dialogs';
+import { TextSource, TextFixedState, GenerationOptionsType } from './TextFixed.state';
 import styles from './TextFixed.scss';
-
-type TextSource = 'lipsum' | 'custom';
-
-export type TextFixedState = {
-	numWords: number;
-	textSource: TextSource;
-	customText: string;
-};
-
-export const initialState: TextFixedState = {
-	numWords: 10,
-	textSource: 'lipsum',
-	customText: ''
-};
 
 const TextFieldDialog = ({
 	visible, data, id, onClose, onUpdateSource, onUpdateCustomText, coreI18n, i18n
@@ -146,7 +133,7 @@ export const getMetadata = (): DTMetadata => ({
 	}
 });
 
-export const rowStateReducer = ({ customText, textSource, numWords }: TextFixedState): any => {
+export const rowStateReducer = ({ customText, textSource, numWords }: TextFixedState): GenerationOptionsType => {
 	const { words } = getLipsumWords();
 	return {
 		words: textSource === 'lipsum' ? words : customText.split(/\s+/),

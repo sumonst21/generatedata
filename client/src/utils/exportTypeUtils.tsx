@@ -1,13 +1,11 @@
 import { exportTypes, ExportTypeFolder } from '../../_plugins';
-import { ETBundle, ETDownloadPacketResponse, ETSettings } from '~types/exportTypes';
+import { ETBrowserBundle, ETDownloadPacketResponse, ETSettings } from '~types/exportTypes';
 import C from '~core/constants';
 import { getLocale, getStrings } from '~utils/langUtils';
 import * as React from 'react';
 
-// export const exportTypeNames = Object.keys(exportTypes).map((folder: ExportTypeFolder) => exportTypes[folder].name);
-
 export type LoadedExportTypes = {
-	[name in ExportTypeFolder]?: ETBundle
+	[name in ExportTypeFolder]?: ETBrowserBundle
 }
 
 // this houses all Export Type code loaded async after the application starts
@@ -15,6 +13,7 @@ const loadedExportTypes: LoadedExportTypes = {};
 
 let cachedGroupedExportTypes: any;
 let lastLocale: any;
+
 export const getGroupedExportTypes = (): any => {
 	const locale = getLocale();
 	const i18n = getStrings();
@@ -82,6 +81,7 @@ export const loadExportTypeBundle = (exportType: ExportTypeFolder): any => {
 				const modeFile = document.createElement('script');
 				modeFile.src = `./codeMirrorModes/${mode}.js`;
 				modeFile.onload = (): void => {
+					// @ts-ignore-line
 					resolve();
 				};
 				document.body.appendChild(modeFile);
@@ -100,13 +100,13 @@ export const getExportTypeInitialState = (exportType: ExportTypeFolder): any => 
 
 // *** assumes the callee knows what they're doing & that they've checked the component has been loaded
 export const getExportTypeLabel = (exportType: ExportTypeFolder, settings: any): string | null => {
-	const et = loadedExportTypes[exportType] as ETBundle;
+	const et = loadedExportTypes[exportType] as ETBrowserBundle;
 	return et.getExportTypeLabel ? et.getExportTypeLabel(settings) : null;
 };
 
 export const getExportTypeSettingsComponent = (exportType: ExportTypeFolder): any => {
 	if (loadedExportTypes[exportType]) {
-		const et = loadedExportTypes[exportType] as ETBundle;
+		const et = loadedExportTypes[exportType] as ETBrowserBundle;
 		return et.Settings;
 	}
 	return null;
@@ -114,7 +114,7 @@ export const getExportTypeSettingsComponent = (exportType: ExportTypeFolder): an
 
 export const getExportTypeTitleValidationFunction = (exportType: ExportTypeFolder): any => {
 	if (loadedExportTypes[exportType]?.validateTitleField) {
-		const et = loadedExportTypes[exportType] as ETBundle;
+		const et = loadedExportTypes[exportType] as ETBrowserBundle;
 		return et.validateTitleField;
 	}
 	return null;

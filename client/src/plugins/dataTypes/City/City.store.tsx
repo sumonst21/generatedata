@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 import { DTCustomProps } from '~types/dataTypes';
 import { getSortedRowsArray } from '~store/generator/generator.selectors';
 import { REMOVE_ROW, SELECT_DATA_TYPE } from '~store/generator/generator.actions';
-import { CityState, RegionSource } from './City';
+import { CityState, CityStateRegionRow, RegionSourceEnum } from './City.state';
 
 const getRegionRows = createSelector(
 	getSortedRowsArray,
@@ -15,23 +15,23 @@ export const customProps: DTCustomProps = {
 
 export const actionInterceptors = {
 	// when a Region plugin row is removed, clean up any city fields that may have been mapped to it
-	[REMOVE_ROW]: (regionRowId: string, rowState: CityState, actionPayload: any): CityState | null => {
+	[REMOVE_ROW]: (regionRowId: string, rowState: CityStateRegionRow, actionPayload: any): CityState | null => {
 		if (actionPayload.id === rowState.targetRowId) {
 			return {
 				...rowState,
-				source: RegionSource.any,
+				source: RegionSourceEnum.any,
 				targetRowId: ''
 			};
 		}
 		return null;
 	},
 
-	[SELECT_DATA_TYPE]: (regionRowId: string, rowState: CityState, actionPayload: any): CityState | null => {
+	[SELECT_DATA_TYPE]: (regionRowId: string, rowState: CityStateRegionRow, actionPayload: any): CityState | null => {
 		if (actionPayload.id === rowState.targetRowId) {
 			if (actionPayload.value !== 'Region') {
 				return {
 					...rowState,
-					source: RegionSource.any,
+					source: RegionSourceEnum.any,
 					targetRowId: ''
 				};
 			}

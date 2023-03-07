@@ -1,5 +1,6 @@
 import { DTBundle } from '~types/dataTypes';
-import { initialState, Example, Options, Help, getMetadata, rowStateReducer } from './Constant';
+import { Example, Options, Help, getMetadata, rowStateReducer } from './Constant';
+import { initialState } from './Constant.state';
 
 const bundle: DTBundle = {
 	initialState,

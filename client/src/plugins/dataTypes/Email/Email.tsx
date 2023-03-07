@@ -7,24 +7,13 @@ import Dropdown from '~components/dropdown/Dropdown';
 import TextField from '~components/TextField';
 import { DTHelpProps, DTMetadata, DTOptionsProps } from '~types/dataTypes';
 import * as styles from './Email.scss';
+import { StringSourceEnum, EmailState, defaultDomainSuffixes, defaultDomains, GenerationOptionsType } from './Email.state';
 import { Tooltip } from '~components/tooltips';
 
-export const enum StringSource {
-	random = 'random',
-	fields = 'fields'
-}
-
-export type EmailState = {
-	source: StringSource;
-	fieldId1: string;
-	fieldId2: string;
-	domains: string;
-	domainSuffixes: string;
-}
 
 const EmailDialog = ({ visible, data, id, onClose, coreI18n, onUpdate, rowOptions, i18n }: any): JSX.Element => {
 	const getFieldsRow = (): JSX.Element | null => {
-		if (data.source === StringSource.random) {
+		if (data.source === StringSourceEnum.random) {
 			return null;
 		}
 
@@ -70,17 +59,17 @@ const EmailDialog = ({ visible, data, id, onClose, coreI18n, onUpdate, rowOption
 					<RadioPillRow>
 						<RadioPill
 							label={i18n.randomStringsLabel}
-							onClick={(): void => onUpdate('source', StringSource.random)}
+							onClick={(): void => onUpdate('source', StringSourceEnum.random)}
 							name={`${id}-source`}
-							checked={data.source === StringSource.random}
+							checked={data.source === StringSourceEnum.random}
 							tooltip={i18n.countryPluginsDesc}
 							style={{ marginRight: 10 }}
 						/>
 						<RadioPill
 							label={i18n.fieldsLabel}
-							onClick={(): void => onUpdate('source', StringSource.fields)}
+							onClick={(): void => onUpdate('source', StringSourceEnum.fields)}
 							name={`${id}-source`}
-							checked={data.source === StringSource.fields}
+							checked={data.source === StringSourceEnum.fields}
 							disabled={rowOptions.length === 0}
 							tooltip={rowOptions.length === 0 ? 'disabled.' : ''}
 						/>
@@ -121,21 +110,10 @@ const EmailDialog = ({ visible, data, id, onClose, coreI18n, onUpdate, rowOption
 	);
 };
 
-const defaultDomains = 'google,hotmail,aol,icloud,outlook,yahoo,protonmail';
-const defaultDomainSuffixes = 'com,org,ca,net,co.uk,edu';
-
-export const initialState: EmailState = {
-	source: StringSource.random,
-	fieldId1: '',
-	fieldId2: '',
-	domains: defaultDomains,
-	domainSuffixes: defaultDomainSuffixes
-};
-
 // earlier version of this DT didn't have any state whatsoever
 const getSafeState = (data: EmailState | undefined): EmailState => {
 	return data ? data : {
-		source: StringSource.random,
+		source: StringSourceEnum.random,
 		fieldId1: '',
 		fieldId2: '',
 		domains: defaultDomains,
@@ -148,7 +126,7 @@ export const Options = ({ i18n, coreI18n, id, data, onUpdate, nameRows }: DTOpti
 	const [dialogVisible, setDialogVisibility] = React.useState(false);
 
 	let label = `${i18n.source} ${i18n.random}`;
-	if (safeData.source === StringSource.fields) {
+	if (safeData.source === StringSourceEnum.fields) {
 		label = `${i18n.source} ${i18n.fieldsLabel}`;
 	}
 
@@ -159,10 +137,10 @@ export const Options = ({ i18n, coreI18n, id, data, onUpdate, nameRows }: DTOpti
 		}));
 
 	React.useEffect(() => {
-		if (!nameRows.length && safeData.source === StringSource.fields) {
+		if (!nameRows.length && safeData.source === StringSourceEnum.fields) {
 			onUpdate({
 				...safeData,
-				source: StringSource.random
+				source: StringSourceEnum.random
 			});
 		}
 	}, [nameRows]);
@@ -224,7 +202,7 @@ export const getMetadata = (): DTMetadata => ({
 	}
 });
 
-export const rowStateReducer = (state: EmailState): any => {
+export const rowStateReducer = (state: EmailState): GenerationOptionsType => {
 	const safeData = getSafeState(state);
 	return {
 		...safeData,

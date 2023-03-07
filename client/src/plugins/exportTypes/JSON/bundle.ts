@@ -1,5 +1,6 @@
 import { ETBundle } from '~types/exportTypes';
-import { Settings, initialState, getCodeMirrorMode, getDownloadFileInfo } from './JSON';
+import { Settings, getCodeMirrorMode, getDownloadFileInfo } from './JSON';
+import { initialState } from './JSON.state';
 
 const bundle: ETBundle = {
 	Settings,

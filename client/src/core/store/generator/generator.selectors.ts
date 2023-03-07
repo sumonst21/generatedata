@@ -4,6 +4,7 @@ import { CurrentDataSet, DataRow, DataRows } from './generator.reducer';
 import { GeneratorPanel } from '~types/general';
 import { DataTypeFolder, ExportTypeFolder } from '../../../../_plugins';
 import * as mainSelectors from '../main/main.selectors';
+import * as coreUtils from '~utils/coreUtils';
 import * as langUtils from '~utils/langUtils';
 import { processBatches, getDataType } from '~utils/dataTypeUtils';
 import {
@@ -35,6 +36,7 @@ export const getExportTypeSettings = (state: Store): any => state.generator.expo
 export const getExportSettingsTab = (state: Store): any => state.generator.exportSettingsTab;
 export const isGenerationSettingsPanelVisible = (state: Store): boolean => state.generator.showGenerationSettingsPanel;
 export const isHelpDialogVisible = (state: Store): boolean => state.generator.showHelpDialog;
+export const isSchemaDialogVisible = (state: Store): boolean => state.generator.showSchemaDialog;
 export const isClearPageDialogVisible = (state: Store): boolean => state.generator.showClearPageDialog;
 export const getHelpDialogSection = (state: Store): DataTypeFolder | null => state.generator.helpDialogSection;
 export const getNumRowsToGenerate = (state: Store): number => state.generator.numRowsToGenerate;
@@ -47,6 +49,15 @@ export const getCurrentDataSet = (state: Store): CurrentDataSet => state.generat
 export const hasBulkActionPending = (state: Store): boolean => state.generator.bulkActionPending;
 export const isCountryNamesLoading = (state: Store): boolean => state.generator.isCountryNamesLoading;
 export const isCountryNamesLoaded = (state: Store): boolean => state.generator.isCountryNamesLoaded;
+
+export const getCurrentExportTypeWorkerUrl = createSelector(
+	getExportType,
+	getLoadedExportTypes,
+	(exportType, loadedExportTypes) => {
+		const exportTypeWorkerMap = coreUtils.getExportTypeWorkerMap(loadedExportTypes);
+		return exportTypeWorkerMap[exportType] || '';
+	}
+);
 
 export const getNumRows = createSelector(
 	getSortedRows,
@@ -80,7 +91,7 @@ export const getSortedRowsWithDataTypeSelected = createSelector(
 	(rows) => rows.filter((row: DataRow) => row.dataType !== null && row.dataType.trim() !== '')
 );
 
-// returns everything in the grid where a data type has been selected
+// returns everything in the grid where a Data Type has been selected
 export const getColumns = createSelector(
 	getSortedRowsWithDataTypeSelected,
 	(rows): (ColumnData & { id: string })[] => {
@@ -133,37 +144,36 @@ export const getPreviewRows = createSelector(
 	}
 );
 
-type ProcessOrders = {
-	[num: number]: any;
+// TODO types for rows!
+export const convertRowsToGenerationTemplate = (rows: any): GenerationTemplate => {
+	const templateByProcessOrder: GenerationTemplate = {};
+	rows.map(({ id, title, dataType, data }: any, colIndex: number) => {
+		const processOrder = processBatches[dataType as DataTypeFolder] as number;
+		const { rowStateReducer } = getDataType(dataType);
+
+		if (!templateByProcessOrder[processOrder]) {
+			templateByProcessOrder[processOrder] = [];
+		}
+
+		templateByProcessOrder[processOrder].push({
+			id,
+			title,
+			dataType,
+			colIndex,
+
+			// settings for the DT cell. The rowStateReducer is optional: it lets developers convert the Data Type row
+			// state into something friendlier for the generation step
+			rowState: rowStateReducer ? rowStateReducer(data) : data
+		});
+	});
+
+	return templateByProcessOrder;
 };
 
 export const getGenerationTemplate = createSelector(
 	getSortedRowsWithDataTypeSelected,
 	getLoadedDataTypes, // yup, intentional! This ensures the selector will be re-ran after the data types are async loaded
-	(rows): GenerationTemplate => {
-		const templateByProcessOrder: ProcessOrders = {};
-		rows.map(({ id, title, dataType, data }: any, colIndex: number) => {
-			const processOrder = processBatches[dataType as DataTypeFolder] as number;
-			const { rowStateReducer } = getDataType(dataType);
-
-			if (!templateByProcessOrder[processOrder]) {
-				templateByProcessOrder[processOrder] = [];
-			}
-
-			templateByProcessOrder[processOrder].push({
-				id,
-				title,
-				dataType,
-				colIndex,
-
-				// settings for the DT cell. The rowStateReducer is optional: it lets developers convert the Data Type row
-				// state into something friendlier for the generation step
-				rowState: rowStateReducer ? rowStateReducer(data) : data
-			});
-		});
-
-		return templateByProcessOrder;
-	}
+	convertRowsToGenerationTemplate
 );
 
 export const hasData = createSelector(
@@ -274,7 +284,7 @@ export const getCodeMirrorMode = createSelector(
 	getExportTypeSettings,
 	(exportType, loadedExportTypes, exportTypeSettings) => {
 		if (!loadedExportTypes[exportType]) {
-			return "";
+			return '';
 		}
 		return exportTypeUtilsGetCodeMirrorMode(exportType, exportTypeSettings[exportType]);
 	}
@@ -285,7 +295,7 @@ export const getExportTypeTitleValidationFunction = createSelector(
 	getLoadedExportTypes,
 	(exportType, loadedExportTypes) => {
 		if (!loadedExportTypes[exportType]) {
-			return "";
+			return '';
 		}
 		return exportTypeGetExportTypeTitleValidation(exportType);
 	}
@@ -354,21 +364,23 @@ export const currentDataSetNeedsCountryNames = createSelector(
 );
 
 // generates a schema of all the data needed to recreate the current data set
-export const getDataSetSchema = createSelector(
+export const getGenerationSchema = createSelector(
 	getRows,
 	getSortedRows,
-	shouldStripWhitespace,
-	(rows, sortedRows, stripWhitespace) => {
+	getExportType,
+	getCurrentExportTypeSettings,
+	(rows, sortedRows, exportType, exportTypeSettings): any => {
 		const nonEmptyRows = sortedRows.filter((id) => !!rows[id].dataType);
-		return {
-			data: nonEmptyRows.map((rowId) => {
-				const {id, title, dataType, data} = rows[rowId];
-				return {id, title, dataType, data};
+		return JSON.stringify({
+			rows: nonEmptyRows.map((rowId) => {
+				const { title, dataType, data } = rows[rowId];
+				return { title, dataType, data };
 			}),
-			exportType: "...",
-			exportTypeSettings: {},
-			stripWhitespace,
-			numRows: 1
-		};
+			exportType,
+			exportTypeSettings,
+			// nope. These are settings specific to the particular generation, not the data itself. Separate them
+			// stripWhitespace,
+			// numRows: 1
+		}, null, '   ');
 	}
 );

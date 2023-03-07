@@ -57,6 +57,7 @@
     "import/prefer-default-export": "off",
     "lines-between-class-members": "off",
     "object-curly-newline": "off",
+    "quotes": ["error", "single"],
     "import/no-mutable-exports": "off",
     "react/no-unused-prop-types": "off",
     "react/no-unescaped-entities": "off",
@@ -70,20 +71,12 @@
     ],
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
+    "@typescript-eslint/interface-name-prefix": "off",
     "@typescript-eslint/no-use-before-define": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
-    "@typescript-eslint/camelcase": [
-      "error",
-      {
-        "allow": [
-          "field_Oracle",
-          "field_MSSQL",
-          "field_Postgres"
-        ]
-      }
-    ]
+    "@typescript-eslint/ban-ts-comment": "off"
   },
   "settings": {
     "react": {

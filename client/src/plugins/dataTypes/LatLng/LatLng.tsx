@@ -1,16 +1,6 @@
 import * as React from 'react';
 import { DTHelpProps, DTMetadata, DTOptionsProps } from '~types/dataTypes';
 
-export type LatLngState = {
-	lat: boolean;
-	lng: boolean;
-};
-
-export const initialState: LatLngState = {
-	lat: true,
-	lng: true
-};
-
 export const Options = ({ i18n, data, id, onUpdate }: DTOptionsProps): JSX.Element => {
 	const onChange = (field: string, checked: boolean): void => {
 		onUpdate({
@@ -32,8 +22,6 @@ export const Options = ({ i18n, data, id, onUpdate }: DTOptionsProps): JSX.Eleme
 };
 
 export const Help = ({ i18n }: DTHelpProps): JSX.Element => <p>{i18n.DESC}</p>;
-
-export const rowStateReducer = (state: LatLngState): LatLngState => state;
 
 export const getMetadata = (): DTMetadata => ({
 	general: {

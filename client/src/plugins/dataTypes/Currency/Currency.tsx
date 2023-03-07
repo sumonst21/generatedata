@@ -5,18 +5,8 @@ import { DTHelpProps, DTMetadata, DTOptionsProps } from '~types/dataTypes';
 import Dropdown from '~components/dropdown/Dropdown';
 import TextField from '~components/TextField';
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '~components/dialogs';
+import { PrefixLocationEnum } from './Currency.state';
 import styles from './Currency.scss';
-
-export const initialState = {
-	example: '0.00|100.00|$|prefix|true|,|.',
-	from: '0.00',
-	to: '100.00',
-	currencySymbol: '$',
-	currencySymbolLocation: 'prefix',
-	includeCents: true,
-	thousandsSeparator: ',',
-	centsSeparator: '.'
-};
 
 export const Example = ({ i18n, data, onUpdate }: any): JSX.Element => {
 	const onChange = (i: any): void => {
@@ -107,17 +97,17 @@ const CurrencySettingsDialog = ({ id, visible, data, onUpdate, onClose, coreI18n
 							/>
 							<input
 								type="radio"
-								checked={data.currencySymbolLocation === 'prefix'}
+								checked={data.currencySymbolLocation === PrefixLocationEnum.prefix}
 								name={`${id}-currencySymbolLocation`}
 								id={`${id}-currencySymbolLocation1`}
-								onChange={(): void => onChange('currencySymbolLocation', 'prefix')} />
+								onChange={(): void => onChange('currencySymbolLocation', PrefixLocationEnum.prefix)} />
 							<label htmlFor={`${id}-currencySymbolLocation1`}>Prefix</label>
 							<input
 								type="radio"
-								checked={data.currencySymbolLocation === 'suffix'}
+								checked={data.currencySymbolLocation === PrefixLocationEnum.suffix}
 								name={`${id}-currencySymbolLocation`}
 								id={`${id}-currencySymbolLocation2`}
-								onChange={(): void => onChange('currencySymbolLocation', 'suffix')} />
+								onChange={(): void => onChange('currencySymbolLocation', PrefixLocationEnum.suffix)} />
 							<label htmlFor={`${id}-currencySymbolLocation2`}>Suffix</label>
 						</div>
 					</div>

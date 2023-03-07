@@ -7,17 +7,13 @@ import * as selectors from './store/generator/generator.selectors';
 import * as mainSelectors from './store/main/main.selectors';
 import { requestCountryNames } from '~store/generator/generator.actions';
 import { DataTypeFolder } from '../../_plugins';
-import { createDataTypeWorker, createExportTypeWorker } from '~utils/coreUtils';
+import { createGenerationWorker } from '~utils/coreUtils';
 import { initAuthVendors } from '~utils/authUtils';
 import { getCurrentPageLocale } from '~utils/langUtils';
-import { AuthMethod } from '~types/general';
 import '../../_imports';
 
 export const init = (): void => {
-
-	// create the preview workers. These handle the job of farming out work to the various plugin worker files.
-	createDataTypeWorker('preview');
-	createExportTypeWorker('preview');
+	createGenerationWorker('preview');
 
 	const state = store.getState();
 	const pageLocale = getCurrentPageLocale();
@@ -30,7 +26,7 @@ export const init = (): void => {
 	const numRows = selectors.getNumRows(state);
 
 	store.dispatch(mainActions.selectLocale(pageLocale));
-	store.dispatch(actions.onSelectExportType(exportType, false));
+	store.dispatch(actions.onSelectExportType(exportType, { shouldRefreshPreviewPanel: false }));
 
 	const loadCountryNames = selectors.currentDataSetNeedsCountryNames(state);
 	if (loadCountryNames) {
@@ -39,9 +35,7 @@ export const init = (): void => {
 
 	// if there's a live session, verify the JWT is still valid
 	if (isLoggedIn) {
-		if (mainSelectors.getAuthMethod(state) === AuthMethod.default) {
-			store.dispatch(mainActions.updateRefreshToken());
-		}
+		store.dispatch(mainActions.updateRefreshToken());
 	} else {
 		store.dispatch(mainActions.setOnloadAuthDetermined());
 	}

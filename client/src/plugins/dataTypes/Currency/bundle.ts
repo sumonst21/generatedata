@@ -1,5 +1,6 @@
 import { DTBundle } from '~types/dataTypes';
-import { initialState, Help, Example, Options, getMetadata } from './Currency';
+import { Help, Example, Options, getMetadata } from './Currency';
+import { initialState } from './Currency.state';
 
 const bundle: DTBundle = {
 	initialState,
